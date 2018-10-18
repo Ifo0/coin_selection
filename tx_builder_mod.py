@@ -94,8 +94,11 @@ if __name__ == '__main__':
 		total = 0
 		for tuple in inputs:
 			total += tuple[2]
+		#check whether a combination of inputs /w same amount
+		#already exists
 		if total not in data_structure.keys():
 			data_structure[total] = inputs
+		#if yes see whether it is more efficient (less inputs)
 		else:
 			if len(data_structure[total]) > len(inputs):
 				data_structure[total] = inputs

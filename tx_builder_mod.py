@@ -1,7 +1,8 @@
 #!/usr/bin/python3
 import random
 
-
+def sotByLastValue(tuple):
+	return tuple[-1]
 
 def get_inputs(utxo_set, amount, fee):
 	"""
@@ -25,11 +26,30 @@ def get_inputs(utxo_set, amount, fee):
 	inputs = []
 	dict = {}
 	total = 0
+
+	#sorting the UTXO set by its value
+	sorted_utxo_set = sorted(utxo_set, key = sotByLastValue)
+	utxo_below_total = []
+	utxo_above_total = []
+	output_value = amount + fee
+	count = 0
+	for utxo in sorted_utxo_set:
+		if utxo[2] >= output_value:
+			break
+		elif utxo[2] < output_value:
+			count += 1
+
+	#creating two lists, one containing utxo, whose value is bellow the output amouts
+	#another containing utxo that are equal to or above the output amount
+	utxo_below_total = sorted_utxo_set[:count]
+	utxo_above_total = sorted_utxo_set[count:]
+
 	#Magic range;
 	#Assumption: within 20 iterations a subest would definately be found
 	#that satisfy the condition total >= amount + fee
 	for num in range(1,21):
-		selection = random.choice(utxo_set)
+		selection = random.choice(utxo_below_total)
+		utxo_below_total.remove(selection)
 		total += selection[2]
 		 # add amount to total
 		inputs.append(selection)
@@ -37,8 +57,6 @@ def get_inputs(utxo_set, amount, fee):
 		# if we get enough amount in the inputs
 		if total >= amount + fee:
 			return inputs
-
-	return inputs
 
 
 if __name__ == '__main__':
@@ -83,6 +101,11 @@ if __name__ == '__main__':
 	min_diff = min(data_structure.keys())
 	best_selection = data_structure[min_diff]
 	
+
+# if utxo_above_total[0][2] - output_value < total - output_value:
+#    #make sure the returned item is a list of tuples for consistency
+#    return [(utxo_above_total[0])]
+# else:
 
 
 

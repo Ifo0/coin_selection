@@ -4,6 +4,27 @@ import random
 def sotByLastValue(tuple):
 	return tuple[-1]
 
+def sortUtxo(utxo_set, above = False):
+	#sorting the UTXO set by its value
+	sorted_utxo_set = sorted(utxo_set, key = sotByLastValue)
+	utxo_below_total = []
+	utxo_above_total = []
+	output_value = amount + fee
+	count = 0
+	for utxo in sorted_utxo_set:
+		if utxo[2] >= output_value:
+			break
+		elif utxo[2] < output_value:
+			count += 1
+	#creating two lists, one containing utxo, whose value is bellow the output amouts
+	#another containing utxo that are equal to or above the output amount
+	utxo_below_total = sorted_utxo_set[:count]
+	utxo_above_total = sorted_utxo_set[count:]
+	if above == False:
+		return utxo_below_total
+	else:
+		return utxo_above_total
+
 def get_inputs(utxo_set, amount, fee):
 	"""
  	this function should return a subset of utxo_set
@@ -26,30 +47,14 @@ def get_inputs(utxo_set, amount, fee):
 	inputs = []
 	dict = {}
 	total = 0
-
-	#sorting the UTXO set by its value
-	sorted_utxo_set = sorted(utxo_set, key = sotByLastValue)
-	utxo_below_total = []
-	utxo_above_total = []
-	output_value = amount + fee
-	count = 0
-	for utxo in sorted_utxo_set:
-		if utxo[2] >= output_value:
-			break
-		elif utxo[2] < output_value:
-			count += 1
-
-	#creating two lists, one containing utxo, whose value is bellow the output amouts
-	#another containing utxo that are equal to or above the output amount
-	utxo_below_total = sorted_utxo_set[:count]
-	utxo_above_total = sorted_utxo_set[count:]
-
 	#Magic range;
 	#Assumption: within 20 iterations a subest would definately be found
 	#that satisfy the condition total >= amount + fee
+	subset = sortUtxo(utxo_set, above = False)
+
 	for num in range(1,21):
-		selection = random.choice(utxo_below_total)
-		utxo_below_total.remove(selection)
+		selection = random.choice(subset)
+		subset.remove(selection)
 		total += selection[2]
 		 # add amount to total
 		inputs.append(selection)
@@ -89,6 +94,8 @@ if __name__ == '__main__':
 	#This subset is stored in the best_selection variable and used for the transaction
 	#I am aware that the keys may be overwritten if another subsets amouts to The
 	#same total value, but let's ignore that for now.
+
+	sanity_checker = 0
 	for num in range(1, 200):
 		inputs = get_inputs(utxo_set, amount, fee)
 		total = 0
@@ -103,14 +110,27 @@ if __name__ == '__main__':
 			if len(data_structure[total]) > len(inputs):
 				data_structure[total] = inputs
 			else:
-				continue
+				#a sanity_checker to make sure that that
+				#if all the options are exhausted
+				#the loop does not run for no reason
+				sanity_checker += 1
+				if sanity_checker == 20:
+					break
+				else:
+					continue
 
 
 	print(data_structure.keys())
+	print("Sanity levels reached:", sanity_checker)
 	print("Number of unique subsets generated:", len(data_structure))
 	print("\n")
+
+	subset_above = sortUtxo(utxo_set, above = True)
 	min_diff = min(data_structure.keys())
-	best_selection = data_structure[min_diff]
+	if subset_above[0][2] - amountAndFee < min_diff:
+		best_selection = [(subset_above[0])]
+	else:
+		best_selection = data_structure[min_diff]
 
 
 # if utxo_above_total[0][2] - output_value < total - output_value:

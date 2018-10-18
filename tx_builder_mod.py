@@ -94,13 +94,21 @@ if __name__ == '__main__':
 		total = 0
 		for tuple in inputs:
 			total += tuple[2]
-		data_structure[total] = inputs
+		if total not in data_structure.keys():
+			data_structure[total] = inputs
+		else:
+			if len(data_structure[total]) > len(inputs):
+				data_structure[total] = inputs
+			else:
+				continue
+
+
 	print(data_structure.keys())
 	print("Number of unique subsets generated:", len(data_structure))
 	print("\n")
 	min_diff = min(data_structure.keys())
 	best_selection = data_structure[min_diff]
-	
+
 
 # if utxo_above_total[0][2] - output_value < total - output_value:
 #    #make sure the returned item is a list of tuples for consistency
